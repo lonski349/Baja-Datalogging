@@ -1,6 +1,6 @@
 //Kaelan Strones
 //10/15/2015
-//
+//1.0
 //This program will take the sensor data from the adafruit 10 DOF sensor
 //specifically the gyro and accelerometer data
 //This data will then be saved into the SD card that is on the wifi shield of the arduino
