@@ -1,8 +1,3 @@
-/*
-SET ACCELEROMETER SCALE
-This function will go through and set the scale within the Adafruit sensor 
-*/
-
 void setAccScl (){
   byte address = 0b0011001;
   byte reg = 0x23;

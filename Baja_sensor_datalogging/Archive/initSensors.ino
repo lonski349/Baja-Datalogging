@@ -1,8 +1,4 @@
-/*
-SENSOR INITILIZATION
-Runs through the process of initilizing all of the sensors one by one 
-*/
-
+//Sensor initilization function 
 void initSensors(){
   //Serial.println("Initilizing");
   accel.begin();

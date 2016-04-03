@@ -11,12 +11,6 @@ String newFileName (){
   String fullName;
   char *fileNameArray;
   
-  /*
-  FIND A VALID FILE NAME
-  Create a new file name and then check if the file name already exists
-  if the name already exists then start to add numbers to the end of the 
-  file name to make it different
-  */
   
   fullName += fileName;
   fullName += fileEnd;
@@ -27,6 +21,7 @@ String newFileName (){
     fullName = fileName;
     fullName += fileNum;
     fullName += fileEnd;
+    //Serial.println("#1 " + fullName);
     fileNameArray = new char [fullName.length()];
     fullName.toCharArray(fileNameArray, fullName.length());
     while(SD.exists(fileNameArray)){

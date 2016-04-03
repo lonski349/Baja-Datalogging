@@ -42,132 +42,108 @@ File sensorData;
 String fullName;
 char *fileNameArray;
 
-const int BOARDLED = 7;
+const int LED = 7;
 const int SWLED = 8;
 const int RECSW = 6;
 
+int GyroScale = 0;
 int ACCSCALE = 0;
 double AccelX;
 double AccelY;
 double AccelZ;
+  
+float GyroX = 0;    //equals zero temporarily
+float GyroY = 0;
+//double GyroZ;
 
 float AngleX;
 float AngleY;
+
+float prevTimeX = 0;
+float nextTimeX = 0;
+float prevTimeY = 0;
+float nextTimeY = 0;
 
 boolean nextSwitch = false;
 boolean prevSwitch = false;
 
 //Create a name for a sensor event
 sensors_event_t accelerometers;
+sensors_event_t gyros;
 sensors_vec_t orientation;
 
 void setup() {
   
-  pinMode(BOARDLED, OUTPUT);
+  pinMode(LED, OUTPUT);
   pinMode(SWLED, OUTPUT);
   pinMode(RECSW, INPUT);
   
   digitalWrite(SWLED, HIGH);
   
-  /*
-  DIAGNOSTICS
-  These serial communications to the computer are a last resort becasue the arduino may
-  reset many times while connecting causing multiples of data to show in the file system
-  Also utilizing the USB connection requires us to open the sealed box. 
-  */
+  //Last resort diagnostics
+  //These serial communications to the computer are a last resort becasue the arduino may
+  //reset many times while connecting causing multiples of data to show in the data
  
   //Serial.begin(115200);
   //Serial.println("Booting");
   initSensors();
-  /*
-  Flash the LED's for the initilization success
-  */
   digitalWrite(SWLED, LOW);
-  digitalWrite(BOARDLED, HIGH);
   delay(200);
   digitalWrite(SWLED, HIGH);
-  digitalWrite(BOARDLED, LOW);
   delay(100);
   //Serial.println("Sensors Initilized");
   setAccScl();
-  /*
-  Flash the LED's for scale setting success
-  */
   digitalWrite(SWLED, LOW);
-  digitalWrite(BOARDLED, HIGH);
   delay(200);
   digitalWrite(SWLED, HIGH);
-  digitalWrite(BOARDLED, LOW);
   //Serial.println("Acc Scaled");
+  //setGyroScl;
   
   //Begin the SD communications protocols. Failures here will tend to be when the sd card is disconnected or was not properly connected.
   if(!SD.begin(4)){
     while(true){
-      /*
-      Flash the LED's in a specific pattern if the SD card read fails
-      */
       fileReadFail();
     }
   }
   else{
-    /*
-    Flash the LED's for sucessful SD card read
-    */
     digitalWrite(SWLED, LOW);
-    digitalWrite(BOARDLED, HIGH);
     delay(200);
     digitalWrite(SWLED, HIGH);
-    digitalWrite(BOARDLED, LOW);
   }
 }
 
 //Start the loop for logging the data after all initilization tasks are done
 void loop() {
   
-  /*
-  GET SWITCH VAL
-  Sets the new switch vlaue to give us information when the switch has changed and when we need to
-  make a new file
-  */
   prevSwitch = nextSwitch;
   nextSwitch = digitalRead(RECSW);
 
-  
-  accel.getEvent(&accelerometers); //Get a new accelerometer event(Refreashes the values)
-  
-  /*
-  ACCELEROMETER SCALING
-  The scaling function for this is in a seperate file titled scaleAcc
-  */
+  //The following two lines gets a new accelerometer event(Refreashes the values)
+  accel.getEvent(&accelerometers);
   
   AccelX = scaleAcc(accelerometers.acceleration.x);
   AccelY = scaleAcc(accelerometers.acceleration.y);
   AccelZ = scaleAcc(accelerometers.acceleration.z);
   
-  /*
-  GET ANGLES
-  Utilize the orientation library from the Adafruit 10DOF sensor to get the current angle 
-  of the device and in this situation the car. 
-  Roll is the side to side angle of the car 
-  Pitch is the front to back angle of the car
-  */
   if (dof.accelGetOrientation(&accelerometers, &orientation)){
     AngleX = orientation.pitch;
     AngleY = orientation.roll;
   }
   
-  /*
-  DIAGNOSTICS
-  Use these diagnostics as a last resort to solving a problem because this will
-  require the sealed box to be opened.
-  */
-  
+  //GyroX = scaleGyro(gyros.gyro.x);
+  //nextTimeX = millis();
+  //GyroY = gyros.gyro.y * 50;
+  //nextTimeY = millis();
+  //GyroZ = gyros.gyro.z;    //Leaving out the z value as it seems useless for our applicaiton
+  //Serial.println(GyroY);
+  //AngleY = getAngle(prevTimeY, nextTimeY, GyroY, AngleY);
+      
+  //Serial.print(",Y: ");
+  //Serial.println(AngleY);
   //Serial.println(nextTimeY - prevTimeY);
   
   //Serial.print(",Y: ");
   //Serial.println(AngleY);
-  //Serial.print(",X: ");
-  //Serial.println(AngleX);
   //Serial.print("Accel ");
   //Serial.print("X: ");
   //Serial.print(accelerometers.acceleration.x);
@@ -176,42 +152,28 @@ void loop() {
   //Serial.print(",Z: ");
   //Serial.println(accelerometers.acceleration.z);
   
+  //Serial.print("Gyro ");
+  //Serial.print("X: ");
+  //Serial.print(gyros.gyro.x);
+  //Serial.print(",Y: ");
+  //Serial.print(gyros.gyro.y);
+  
   //Serial.println(digitalRead(RECSW));
   
-  /*
-  SWITCH CHECKING
-  */
-  
   if(nextSwitch && !prevSwitch){
-    /*
-    Create a new file because the switch has just changed positions 
-    */
+    
     fullName = newFileName();
     fileNameArray = new char [fullName.length()];
     fullName.toCharArray(fileNameArray, fullName.length());
     
-    printData(AccelX, AccelY, AccelZ, AngleX, AngleY);
+    printData(AccelX, AccelY, AccelZ, GyroX, GyroY);
   }
   else if (nextSwitch && prevSwitch){ 
-    /*
-    The switch has not changed positions so keep writing data to the same place
-    */
     printData(AccelX, AccelY, AccelZ, AngleX, AngleY);   
   }
   
   else{
-    /*
-    Flash the LED's to show the user that there is power and the device is waiting
-    for input from the user, E.G when the device is not recording data
-    */
-    
-    digitalWrite(BOARDLED, LOW);
-    digitalWrite(SWLED, HIGH);
-    delay(300);
-    digitalWrite(BOARDLED, HIGH);
-    digitalWrite(SWLED, LOW);
-    delay(100);
-    digitalWrite(BOARDLED, LOW);
+    digitalWrite(LED, LOW);
     digitalWrite(SWLED, HIGH);
   }
 }
