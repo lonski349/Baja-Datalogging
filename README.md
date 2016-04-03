@@ -10,6 +10,19 @@ We are currently working on getting angles of the car also printed to the spread
 
 This project also contains a project for strain gauge datalogging. This portion of code is untested and parts are still needed before tests can be run. 
 
+The components utilized in the project 
+  IMU
+   1. Arduino Uno
+   2. Adafruit 10DOF 
+   3. Adafruit Wifi Shield
+   
+  Strain Gauge System
+   1. Arduino Mega
+   2. Adafruit Wifi Shield
+   3. Adafruit ADS1115 4 channel ADC converter
+   4. Custom built gauge bridge PCB
+ 
+
 Future projects
  1. strain gauge datalogging 
  2. thermal datalogging
